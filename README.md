@@ -1,12 +1,31 @@
 # sales_analytics
-Análisis de ventas con SQL avanzado
+Análisis de ventas con SQL avanzado + Dashboard Power BI
+
 ## Descripción
 Análisis del rendimiento de ventas de AdventureWorks para identificar oportunidades 
 de crecimiento, optimizar la estrategia comercial y mejorar la toma de decisiones 
 basada en datos.
 
 El proyecto responde 7 preguntas clave de negocio usando SQL avanzado sobre la base 
-de datos AdventureWorks2022 de Microsoft SQL Server.
+de datos AdventureWorks2022 de Microsoft SQL Server, y visualiza los resultados en un 
+dashboard ejecutivo interactivo construido en Power BI.
+
+---
+
+## Dashboard
+
+![Sales Executive Dashboard](dashboard.png)
+
+El dashboard consolida los principales KPIs del análisis en una única página ejecutiva 
+con 3 filtros interactivos (Año, Territorio, Categoría) que actúan sobre todos los 
+visuales simultáneamente.
+
+**KPIs principales:**
+- Revenue total: $109.8M
+- Profit Margin: 14.45%
+- Clientes únicos: 19,119
+- AOV medio: $3,491
+- Repeat Rate: 39.07%
 
 ---
 
@@ -25,6 +44,7 @@ de datos AdventureWorks2022 de Microsoft SQL Server.
 - Microsoft SQL Server 2022
 - SQL Server Management Studio (SSMS)
 - T-SQL
+- Power BI Desktop
 
 ---
 
@@ -35,6 +55,30 @@ de datos AdventureWorks2022 de Microsoft SQL Server.
 - Análisis Pareto — porcentaje acumulado con SUM OVER y ORDER BY
 - CLV aproximado — revenue total / años de antigüedad
 - Segmentación de clientes — nuevos vs recurrentes con lógica de primera compra
+- Views SQL — modelo en estrella para alimentar Power BI
+- ProductCostHistory — coste histórico en la fecha exacta de cada venta
+
+---
+
+## Arquitectura del proyecto
+
+El proyecto se estructura en tres capas:
+
+**1. Análisis SQL** (`sales_analysis.sql`)  
+7 queries analíticas que responden las preguntas de negocio con técnicas avanzadas de T-SQL.
+
+**2. Capa de datos para Power BI** (`views/`)  
+4 views SQL que implementan un esquema en estrella optimizado para el dashboard:
+
+| View | Descripción |
+|------|-------------|
+| `vw_fact_ventas` | Línea de pedido con revenue, coste histórico y margen |
+| `vw_dim_producto` | Jerarquía producto → subcategoría → categoría |
+| `vw_dim_cliente` | Segmentación y métricas de valor de cliente |
+| `vw_dim_territorio` | Territorios y regiones de venta |
+
+**3. Dashboard Power BI** (`dashboard.pbix`)  
+7 medidas DAX sobre el modelo en estrella con 8 visuales interactivos.
 
 ---
 
@@ -43,15 +87,13 @@ de datos AdventureWorks2022 de Microsoft SQL Server.
 ### Productos y margen
 - **Bikes** lidera en revenue con $94M pero con márgenes moderados
 - **Accessories** tiene el mayor profit margin — productos con bajo coste y buen precio
-- **Road Frames** (-4.48%), **Jerseys** (-19.92%) y **Caps** (-12.30%) se venden 
-  por debajo del coste de producción — se recomienda revisar estrategia de precios
+- **Road Frames** (-4.48%), **Jerseys** (-19.92%) y **Caps** (-12.30%) se venden por debajo del coste de producción — se recomienda revisar estrategia de precios
 - **Mountain-200 Black** es el producto estrella con $4.4M de revenue y 27.63% de margen
 
 ### Evolución temporal
 - **2013** fue el año con mayor revenue acumulado anual
 - **Junio 2012** registró el mayor crecimiento interanual
-- El AOV cae de 2012 a 2013 — la captación masiva de clientes nuevos 
-  trajo pedidos de menor valor medio
+- El AOV cae de 2012 a 2013 — la captación masiva de clientes nuevos trajo pedidos de menor valor medio
 
 ### Territorios
 - **Southwest** lidera en revenue con la mayor contribución al total
@@ -59,23 +101,20 @@ de datos AdventureWorks2022 de Microsoft SQL Server.
 - Oportunidad: aumentar volumen en Central manteniendo su alto ticket medio
 
 ### Clientes más valiosos
-- El **8.1% de los clientes (1,551 de 19,119)** genera el **80% del revenue** 
-  — concentración mayor que la regla 80/20 típica
+- El **8.1% de los clientes (1,551 de 19,119)** genera el **80% del revenue** — concentración mayor que la regla 80/20 típica
 - El cliente más valioso acumula **$989,184** en revenue histórico
 - Retener a estos 1,551 clientes es la prioridad estratégica número 1
 
 ### Canales de venta
-- **Tienda** genera el **73.67% del revenue** con AOV de $23,850
-- **Online** tiene 7 veces más pedidos pero AOV de solo $1,172
+- **Tienda** genera el **73.67% del revenue** con AOV de $21,148
+- **Online** tiene 7 veces más pedidos pero AOV de solo $1,061
 - Los pedidos de tienda corresponden a empresas y distribuidores que compran en volumen
 - Oportunidad: aumentar el ticket medio del canal online
 
 ### Comportamiento de compra
-- El **61% de los clientes (11,649)** solo compra una vez — 
-  oportunidad de mejora en retención y fidelización
+- El **61% de los clientes (11,649)** solo compra una vez — oportunidad de mejora en retención y fidelización
 - Solo **1,997 clientes** (10.4%) realizan 3 o más compras
-- Convertir el 10% de los clientes de una sola compra en recurrentes 
-  tendría un impacto significativo en el revenue
+- Convertir el 10% de los clientes de una sola compra en recurrentes tendría un impacto significativo en el revenue
 
 ### Ciclo de ventas
 - El **Repeat Purchase Rate** creció del **6.36% en 2012** al **41.84% en 2014**
@@ -87,20 +126,32 @@ de datos AdventureWorks2022 de Microsoft SQL Server.
 
 ## Conclusiones y recomendaciones
 
-**1. Revisar precios de Road Frames y Jerseys** — se venden con margen negativo. 
-Subir precios o reducir costes de producción es urgente.
+**1. Revisar precios de Road Frames y Jerseys** — se venden con margen negativo. Subir precios o reducir costes de producción es urgente.
 
-**2. Programa de fidelización** — el 61% de clientes solo compra una vez. 
-Implementar campañas de retención para convertirlos en recurrentes.
+**2. Programa de fidelización** — el 61% de clientes solo compra una vez. Implementar campañas de retención para convertirlos en recurrentes.
 
-**3. Proteger a los 1,551 clientes top** — generan el 80% del revenue. 
-Un programa VIP con atención personalizada reduciría el riesgo de churn.
+**3. Proteger a los 1,551 clientes top** — generan el 80% del revenue. Un programa VIP con atención personalizada reduciría el riesgo de churn.
 
-**4. Potenciar el canal tienda** — AOV 20 veces superior al online. 
-Invertir en el equipo de ventas directo tiene mayor retorno que el canal digital.
+**4. Potenciar el canal tienda** — AOV 20 veces superior al online. Invertir en el equipo de ventas directo tiene mayor retorno que el canal digital.
 
-**5. Estrategia en Central** — tiene el AOV más alto de todos los territorios. 
-Aumentar la base de clientes en ese territorio mejoraría el revenue global.
+**5. Estrategia en Central** — tiene el AOV más alto de todos los territorios. Aumentar la base de clientes en ese territorio mejoraría el revenue global.
+
+---
+
+## Estructura del repositorio
+
+sales_analytics/
+│
+├── sales_analysis.sql       # 7 queries analíticas con hallazgos comentados
+├── views/
+│   ├── vw_fact_ventas.sql
+│   ├── vw_dim_producto.sql
+│   ├── vw_dim_cliente.sql
+│   └── vw_dim_territorio.sql
+├── dashboard.pbix            # Dashboard Power BI
+├── dashboard.png             # Captura del dashboard
+└── README.md
+
 
 ---
 
