@@ -14,7 +14,7 @@ dashboard ejecutivo interactivo construido en Power BI.
 
 ## Dashboard
 
-![Sales Executive Dashboard](dashboard.png)
+![Sales Executive Dashboard](dashboard_sales.png)
 
 El dashboard consolida los principales KPIs del análisis en una única página ejecutiva 
 con 3 filtros interactivos (Año, Territorio, Categoría) que actúan sobre todos los 
