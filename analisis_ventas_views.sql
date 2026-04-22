@@ -6,25 +6,26 @@ CREATE OR ALTER VIEW dbo.vw_fact_ventas AS
 SELECT
     od.SalesOrderID,
     oh.OrderDate,
-    YEAR(oh.OrderDate)                                          AS Year,
-    MONTH(oh.OrderDate)                                         AS Month,
+    YEAR(oh.OrderDate) AS Year,
+    MONTH(oh.OrderDate) AS Month,
     oh.CustomerID,
     oh.TerritoryID,
     od.ProductID,
     oh.OnlineOrderFlag,
     od.OrderQty,
     od.UnitPrice,
-    od.LineTotal                                                AS Revenue,
+    od.LineTotal AS Revenue,
     CASE 
-        WHEN pch.StandardCost > od.UnitPrice 
-        THEN od.UnitPrice * od.OrderQty
+        WHEN pch.StandardCost > od.UnitPrice THEN od.UnitPrice * od.OrderQty
         ELSE pch.StandardCost * od.OrderQty
-    END                                                         AS Cost,
+    END AS Cost,
+
     CASE 
         WHEN pch.StandardCost > od.UnitPrice 
         THEN 0
         ELSE od.LineTotal - (pch.StandardCost * od.OrderQty)
-    END                                                         AS Profit,
+    END AS Profit,
+
     CASE 
         WHEN pch.StandardCost > od.UnitPrice 
         THEN 0
@@ -32,7 +33,7 @@ SELECT
             (od.LineTotal - (pch.StandardCost * od.OrderQty))
             / NULLIF(od.LineTotal, 0) * 100
         AS DECIMAL(5,2))
-    END                                                         AS ProfitMargin
+    END AS ProfitMargin
 FROM
     Sales.SalesOrderDetail AS od
 INNER JOIN Sales.SalesOrderHeader AS oh
@@ -56,11 +57,11 @@ WHERE
 CREATE OR ALTER VIEW dbo.vw_dim_producto AS
 SELECT
     p.ProductID,
-    p.Name                  AS ProductName,
+    p.Name AS ProductName,
     sub.ProductSubcategoryID AS SubcategoryID,
-    sub.Name                AS Subcategory,
-    cat.ProductCategoryID   AS CategoryID,
-    cat.Name                AS Category,
+    sub.Name AS Subcategory,
+    cat.ProductCategoryID AS CategoryID,
+    cat.Name AS Category,
     p.StandardCost
 FROM
     Production.Product AS p
@@ -79,24 +80,25 @@ CREATE OR ALTER VIEW dbo.vw_dim_cliente AS
 WITH base AS (
     SELECT
         CustomerID,
-        MIN(OrderDate)                              AS PrimeraCompra,
-        MAX(OrderDate)                              AS UltimaCompra,
-        COUNT(SalesOrderID)                         AS NumPedidos,
-        SUM(TotalDue)                               AS RevenueTotal
-    FROM Sales.SalesOrderHeader
-    GROUP BY CustomerID
+        MIN(OrderDate) AS PrimeraCompra,
+        MAX(OrderDate) AS UltimaCompra,
+        COUNT(SalesOrderID) AS NumPedidos,
+        SUM(TotalDue) AS RevenueTotal
+    FROM 
+        Sales.SalesOrderHeader
+    GROUP BY 
+        CustomerID
 )
 SELECT
     CustomerID,
     PrimeraCompra,
     UltimaCompra,
     NumPedidos,
-    CAST(RevenueTotal AS DECIMAL(10,2))             AS RevenueTotal,
+    CAST(RevenueTotal AS DECIMAL(10,2)) AS RevenueTotal,
     CAST(RevenueTotal / NumPedidos AS DECIMAL(10,2)) AS AOV,
     CAST(
         CASE
-            WHEN DATEDIFF(DAY, PrimeraCompra, UltimaCompra) / 365.25 = 0
-            THEN RevenueTotal
+            WHEN DATEDIFF(DAY, PrimeraCompra, UltimaCompra) / 365.25 = 0 THEN RevenueTotal
             ELSE RevenueTotal / (DATEDIFF(DAY, PrimeraCompra, UltimaCompra) / 365.25)
         END
     AS DECIMAL(10,2))                               AS CLV,
@@ -104,7 +106,7 @@ SELECT
         WHEN NumPedidos = 1 THEN '1 compra'
         WHEN NumPedidos = 2 THEN '2 compras'
         ELSE '3+ compras'
-    END                                             AS Segmento
+    END AS Segmento
 FROM base;
 
 -- ============================================================
